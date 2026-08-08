@@ -277,7 +277,8 @@ libinput list-devices 2>/dev/null | awk '
 ' | sort -V | column -t -s $'\t'
 
 ## Determine main display card
-bashio::log.info "DRM video cards:"
+bashio::log.info "Loaded - DRM video cards:"
+bashio::log.info "  (Note: '*' indicates selected card for Xorg)"
 find /dev/dri/ -maxdepth 1 -type c -name 'card[0-9]*' 2>/dev/null | sed 's/^/  /'
 bashio::log.info "DRM video card driver and connection status:"
 selected_card=""

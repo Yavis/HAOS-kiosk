@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.4.0 - August 2026
+
+- Modified log to see if the update works
+
 ## v1.3.2 - April 2026
 
 - Added explicit BUILD_FROM location to Dockerfile for ha core 2026.04+
