@@ -24,5 +24,5 @@ jobs:
                 sed -i -E "s/^version:.*/version: \"${VERSION}\"/" haoskiosk/config.yaml
                 find haoskiosk/* -type f -exec sed -i -E "s/^# Version: [0-9]+\.[0-9]+\.[0-9]+$/# Version: ${VERSION}/" {} +
                 git add haoskiosk/*
-                git commit -m "Bump version to ${VERSION}" || echo "No changes to commit"
+                git commit -m "[skip ci] Bump version to ${VERSION}" || echo "No changes to commit"
                 git push || echo "No changes to push"
