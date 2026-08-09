@@ -1,6 +1,10 @@
 # Changelog
 
 
+## v1.4.3 - August 2026
+
+- Add shell tracing to find the right breaking point
+
 ## v1.4.2 - August 2026
 
 - Add some debug 

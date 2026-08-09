@@ -280,6 +280,14 @@ libinput list-devices 2>/dev/null | awk '
 bashio::log.info "Loaded - DRM video cards:"
 bashio::log.info "  (Note: '*' indicates selected card for Xorg)"
 find /dev /dev/dri \( -type c -name 'fb[0-9]*' -o -type c -name 'card[0-9]*' \) 2>/dev/null | sed 's/^/ /'
+bashio::log.info "DEBUG: about to start DRM detection loop"
+# Enable shell tracing for the DRM detection block to help diagnose early exits
+# Trace to stdout so it appears in container logs
+if command -v bash >/dev/null 2>&1; then
+    BASH_XTRACEFD=1
+    set -x
+    TRACE_ENABLED=1
+fi
 bashio::log.info "DRM video card driver and connection status:"
 selected_card=""
 use_fbdev_fallback=""
@@ -353,6 +361,12 @@ EOF
         cp -a /etc/X11/xorg.conf{.default,}
         #Add "kmsdev" line to Device Section based on 'selected_card'
         sed -i "/Option[[:space:]]\+\"DRI\"[[:space:]]\+\"3\"/a\    Option     \t\t\"kmsdev\" \"/dev/dri/$selected_card\"" /etc/X11/xorg.conf
+    fi
+
+    # Disable shell tracing after DRM detection block to limit log noise
+    if [ -n "${TRACE_ENABLED:-}" ]; then
+        set +x
+        unset BASH_XTRACEFD
     fi
 
     if [ -z "$XORG_CONF" ]; then
