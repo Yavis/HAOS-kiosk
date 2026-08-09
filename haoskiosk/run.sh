@@ -61,6 +61,12 @@ printf '%*s\n' 80 '' | tr ' ' '#'  # Separator
 bashio::log.info "######## Starting HAOSKiosk ########"
 bashio::log.info "$(date) [Version: $ADDON_VERSION]"
 bashio::log.info "$(uname -a)"
+bashio::log.info "DEBUG: enabling shell xtrace for full startup capture"
+if command -v bash >/dev/null 2>&1; then
+    exec 3>&1
+    export BASH_XTRACEFD=3
+    set -x
+fi
 ha_info=$(bashio::info)
 bashio::log.info "Core=$(echo "$ha_info" | jq -r '.homeassistant')  HAOS=$(echo "$ha_info" | jq -r '.hassos')  MACHINE=$(echo "$ha_info" | jq -r '.machine')  ARCH=$(echo "$ha_info" | jq -r '.arch')"
 
@@ -291,21 +297,27 @@ fi
 bashio::log.info "DRM video card driver and connection status:"
 selected_card=""
 use_fbdev_fallback=""
-for status_path in /sys/class/drm/card[0-9]*-*/status; do
-    [ -e "$status_path" ] || continue  # Skip if status file doesn't exist
+if [ -d /sys/class/drm ]; then
+    bashio::log.info "DEBUG: /sys/class/drm exists"
+    ls -l /sys/class/drm | sed 's/^/DEBUG: drm: /' || true
+    for status_path in /sys/class/drm/card[0-9]*-*/status; do
+        [ -e "$status_path" ] || continue  # Skip if status file doesn't exist
 
-    status=$(cat "$status_path")
-    card_port=$(basename "$(dirname "$status_path")")
-    card=${card_port%%-*}
-    driver=$(basename "$(readlink "/sys/class/drm/$card/device/driver")")
-    if [ -z "$selected_card" ]  && [ "$status" = "connected" ]; then
-        selected_card="$card"  # Select first connected card
-        printf "  *"
-    else
-        printf "   "
-    fi
-    printf "%-25s%-20s%s\n" "$card_port" "$driver" "$status"
-done
+        status=$(cat "$status_path")
+        card_port=$(basename "$(dirname "$status_path")")
+        card=${card_port%%-*}
+        driver=$(basename "$(readlink "/sys/class/drm/$card/device/driver")")
+        if [ -z "$selected_card" ]  && [ "$status" = "connected" ]; then
+            selected_card="$card"  # Select first connected card
+            printf "  *"
+        else
+            printf "   "
+        fi
+        printf "%-25s%-20s%s\n" "$card_port" "$driver" "$status"
+    done
+else
+    bashio::log.info "DEBUG: /sys/class/drm missing"
+fi
 if [ -z "$selected_card" ]; then
     # Debug info: log selected card and framebuffer presence to help diagnose early exits
     bashio::log.info "DEBUG: selected_card='${selected_card:-}'"

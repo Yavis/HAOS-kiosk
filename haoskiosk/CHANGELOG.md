@@ -1,5 +1,8 @@
 # Changelog
 
+## v1.4.4 - August 2026
+
+- Try to bypass error and debug
 
 ## v1.4.3 - August 2026
 
