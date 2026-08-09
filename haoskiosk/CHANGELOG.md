@@ -1,6 +1,10 @@
 # Changelog
 
 
+## v1.4.2 - August 2026
+
+- Add some debug 
+
 ## v1.4.1 - August 2026
 
 - Add framebuffer support as fallback on the system if the installation uses generic f.e.

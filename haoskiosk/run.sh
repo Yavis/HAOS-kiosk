@@ -299,6 +299,20 @@ for status_path in /sys/class/drm/card[0-9]*-*/status; do
     printf "%-25s%-20s%s\n" "$card_port" "$driver" "$status"
 done
 if [ -z "$selected_card" ]; then
+    # Debug info: log selected card and framebuffer presence to help diagnose early exits
+    bashio::log.info "DEBUG: selected_card='${selected_card:-}'"
+    if [ -d /sys/class/drm ]; then
+        bashio::log.info "DEBUG: /sys/class/drm exists"
+        ls -l /sys/class/drm | sed 's/^/DEBUG: drm: /' || true
+    else
+        bashio::log.info "DEBUG: /sys/class/drm missing"
+    fi
+    if [ -c /dev/fb0 ]; then
+        bashio::log.info "DEBUG: /dev/fb0 exists"
+        ls -l /dev/fb0 | sed 's/^/DEBUG: fb0: /' || true
+    else
+        bashio::log.info "DEBUG: /dev/fb0 not present"
+    fi
     if [ -c /dev/fb0 ]; then
         bashio::log.info "No connected DRM video card detected; falling back to framebuffer /dev/fb0"
         use_fbdev_fallback=1
