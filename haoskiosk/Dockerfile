@@ -18,6 +18,7 @@ RUN apk update && apk add --no-cache \
 ## Xserver and graphics
      xorg-server \
      xf86-video-modesetting \
+     xf86-video-fbdev \
      mesa-dri-gallium \
      mesa-egl \
      mesa-gles \

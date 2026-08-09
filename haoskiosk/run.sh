@@ -279,9 +279,10 @@ libinput list-devices 2>/dev/null | awk '
 ## Determine main display card
 bashio::log.info "Loaded - DRM video cards:"
 bashio::log.info "  (Note: '*' indicates selected card for Xorg)"
-find /dev/dri/ -maxdepth 1 -type c -name 'card[0-9]*' 2>/dev/null | sed 's/^/  /'
+find /dev /dev/dri \( -type c -name 'fb[0-9]*' -o -type c -name 'card[0-9]*' \) 2>/dev/null | sed 's/^/ /'
 bashio::log.info "DRM video card driver and connection status:"
 selected_card=""
+use_fbdev_fallback=""
 for status_path in /sys/class/drm/card[0-9]*-*/status; do
     [ -e "$status_path" ] || continue  # Skip if status file doesn't exist
 
@@ -298,8 +299,13 @@ for status_path in /sys/class/drm/card[0-9]*-*/status; do
     printf "%-25s%-20s%s\n" "$card_port" "$driver" "$status"
 done
 if [ -z "$selected_card" ]; then
-    bashio::log.info "ERROR: No connected video card detected. Exiting.."
-    exit 1
+    if [ -c /dev/fb0 ]; then
+        bashio::log.info "No connected DRM video card detected; falling back to framebuffer /dev/fb0"
+        use_fbdev_fallback=1
+    else
+        bashio::log.info "ERROR: No connected video card detected. Exiting.."
+        exit 1
+    fi
 fi
 
 #### Start Xorg in the background
@@ -310,9 +316,30 @@ if [[ -n "$XORG_CONF" && "${XORG_APPEND_REPLACE}" = "replace" ]]; then
     bashio::log.info "Replacing default 'xorg.conf'..."
     echo "${XORG_CONF}" >| /etc/X11/xorg.conf
 else
-    cp -a /etc/X11/xorg.conf{.default,}
-    #Add "kmsdev" line to Device Section based on 'selected_card'
-    sed -i "/Option[[:space:]]\+\"DRI\"[[:space:]]\+\"3\"/a\    Option     \t\t\"kmsdev\" \"/dev/dri/$selected_card\"" /etc/X11/xorg.conf
+    if [ -n "$use_fbdev_fallback" ]; then
+        bashio::log.info "Generating framebuffer fallback 'xorg.conf'..."
+        cat > /etc/X11/xorg.conf <<'EOF'
+Section "Device"
+    Identifier "Card0"
+    Driver     "fbdev"
+EndSection
+
+Section "Monitor"
+    Identifier "Monitor0"
+EndSection
+
+Section "Screen"
+    Identifier "Screen0"
+    Device     "Card0"
+    Monitor    "Monitor0"
+    DefaultDepth 24
+EndSection
+EOF
+    else
+        cp -a /etc/X11/xorg.conf{.default,}
+        #Add "kmsdev" line to Device Section based on 'selected_card'
+        sed -i "/Option[[:space:]]\+\"DRI\"[[:space:]]\+\"3\"/a\    Option     \t\t\"kmsdev\" \"/dev/dri/$selected_card\"" /etc/X11/xorg.conf
+    fi
 
     if [ -z "$XORG_CONF" ]; then
         bashio::log.info "No user 'xorg.conf' data provided, using default..."
