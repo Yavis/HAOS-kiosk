@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.4.9
+
+- updated output
+
 ## v1.4.8
 
 - read all devices

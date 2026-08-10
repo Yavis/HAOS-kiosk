@@ -279,8 +279,12 @@ libinput list-devices 2>/dev/null | awk '
 
 ## Determine main display card
 bashio::log.info "Loaded - DRM video cards:"
-# find /dev /dev/dri \( -type c -name 'fb[0-9]*' -o -type c -name 'card[0-9]*' \) 2>/dev/null | sed 's/^/ /'
+devices=$(find /dev /dev/dri \
+  \( -type c -name 'fb0' -o -[ |** any `/dev/dri/cardN` also  2>/dev/null)
 
+[ -n "$devices" ] || exit 1
+
+printf '%s\n' "$devices" | sed 's/^/  /'
 bashio::log.info "DEBUG: about to start DRM detection loop"
 bashio::log.info "DRM video card driver and connection status:"
 selected_card=""
@@ -356,11 +360,29 @@ if [[ -n "$XORG_CONF" && "${XORG_APPEND_REPLACE}" = "replace" ]]; then
 else
     if [ -n "$use_fbdev_fallback" ]; then
         bashio::log.info "Generating framebuffer fallback 'xorg.conf'..."
-        cat > /etc/X11/xorg.conf <<'EOF'
+        fb_dir="/sys/class/graphics/fb0"
+        depth=24
+        if [ -r "$fb_dir/bits_per_pixel" ]; then
+            fb_bpp=$(cat "$fb_dir/bits_per_pixel")
+            case "$fb_bpp" in
+                16|24|32)
+                    depth="$fb_bpp"
+                    ;;
+                *)
+                    depth=24
+                    ;;
+            esac
+            bashio::log.info "Framebuffer /dev/fb0 reports bits_per_pixel=$fb_bpp, using DefaultDepth=$depth"
+        else
+            bashio::log.info "Unable to read framebuffer bits_per_pixel; defaulting DefaultDepth=24"
+        fi
+
+        cat > /etc/X11/xorg.conf <<EOF
 Section "Device"
     Identifier "Card0"
     Driver     "fbdev"
     Option     "fbdev" "/dev/fb0"
+    Option     "ShadowFB" "true"
 EndSection
 
 Section "Monitor"
@@ -371,7 +393,7 @@ Section "Screen"
     Identifier "Screen0"
     Device     "Card0"
     Monitor    "Monitor0"
-    DefaultDepth 24
+    DefaultDepth ${depth}
 EndSection
 EOF
     else
