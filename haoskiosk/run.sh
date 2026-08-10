@@ -279,7 +279,7 @@ libinput list-devices 2>/dev/null | awk '
 
 ## Determine main display card
 bashio::log.info "Loaded - DRM video cards:"
-devices=$(find /dev /dev/dri \( -type c -name 'fb0' -o -[ |** any `/dev/dri/cardN` also  2>/dev/null\)
+devices=$(find /dev /dev/dri \( -type c -name 'fb[0-9]*' -o -type c -name 'card[0-9]*' \) 2>/dev/null)
 
 [ -n "$devices" ] || exit 1
 
