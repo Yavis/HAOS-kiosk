@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.4.13
+
+- handle directories for graphics devices
+
 ## v1.4.12
 
 - Fix issue (hopefully)

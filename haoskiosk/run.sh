@@ -279,11 +279,19 @@ libinput list-devices 2>/dev/null | awk '
 
 ## Determine main display card
 bashio::log.info "Loaded - DRM video cards:"
-devices=$(find /dev /dev/dri \( -type c -name 'fb[0-9]*' -o -type c -name 'card[0-9]*' \) 2>/dev/null)
+if [ -d /dev/dri/card* ]; then
+    ls -l /dev/dri/card* | sed 's/^/  /'
+else
+    bashio::log.info " No DRM video cards found in /dev/dri fallback to framebuffer /dev/fb0"
 
-[ -n "$devices" ] || exit 1
-
-printf '%s\n' "$devices" | sed 's/^/  /'
+    if [ -c /dev/fb0 ]; then
+        bashio::log.info "Framebuffer /dev/fb0 exists"
+        ls -l /dev/fb0 | sed 's/^/  /'
+    else
+        bashio::log.error "Framebuffer /dev/fb0 not present"
+        exit 1
+    fi
+fi
 bashio::log.info "DEBUG: about to start DRM detection loop"
 bashio::log.info "DRM video card driver and connection status:"
 selected_card=""
