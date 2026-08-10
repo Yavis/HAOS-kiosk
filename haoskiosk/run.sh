@@ -62,11 +62,6 @@ bashio::log.info "######## Starting HAOSKiosk ########"
 bashio::log.info "$(date) [Version: $ADDON_VERSION]"
 bashio::log.info "$(uname -a)"
 bashio::log.info "DEBUG: enabling shell xtrace for full startup capture"
-if command -v bash >/dev/null 2>&1; then
-    exec 3>&1
-    export BASH_XTRACEFD=3
-    set -x
-fi
 ha_info=$(bashio::info)
 bashio::log.info "Core=$(echo "$ha_info" | jq -r '.homeassistant')  HAOS=$(echo "$ha_info" | jq -r '.hassos')  MACHINE=$(echo "$ha_info" | jq -r '.machine')  ARCH=$(echo "$ha_info" | jq -r '.arch')"
 
@@ -284,8 +279,8 @@ libinput list-devices 2>/dev/null | awk '
 
 ## Determine main display card
 bashio::log.info "Loaded - DRM video cards:"
-bashio::log.info "  (Note: '*' indicates selected card for Xorg)"
 find /dev /dev/dri \( -type c -name 'fb[0-9]*' -o -type c -name 'card[0-9]*' \) 2>/dev/null | sed 's/^/ /'
+
 bashio::log.info "DEBUG: about to start DRM detection loop"
 # Enable shell tracing for the DRM detection block to help diagnose early exits
 # Trace to stdout so it appears in container logs
@@ -356,6 +351,7 @@ else
 Section "Device"
     Identifier "Card0"
     Driver     "fbdev"
+    Option     "fbdev" "/dev/fb0"
 EndSection
 
 Section "Monitor"
