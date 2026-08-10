@@ -3,7 +3,7 @@ name: "HAOS Kiosk Display"
 description: |
   Start X server and browser on local HAOS server and display dashboards in
   kiosk mode (Jeff Kosowsky)
-version: "1.4.7"
+version: "1.4.8"
 slug: "haoskiosk"
 url: https://github.com/yavis/HAOS-kiosk/tree/main/haoskiosk
 
@@ -29,9 +29,7 @@ ulimits:
     hard: 65536
 
 devices:
-  - /dev/dri/card0
-  - /dev/dri/card1
-  - /dev/dri/renderD128
+  - /dev/dri/*
   - /dev/fb*
 
   - /dev/input/event0

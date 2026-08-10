@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.4.8
+
+- read all devices
+
 ## v1.4.7
 
 - update deps
