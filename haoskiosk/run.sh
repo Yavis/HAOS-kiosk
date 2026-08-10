@@ -279,16 +279,9 @@ libinput list-devices 2>/dev/null | awk '
 
 ## Determine main display card
 bashio::log.info "Loaded - DRM video cards:"
-find /dev /dev/dri \( -type c -name 'fb[0-9]*' -o -type c -name 'card[0-9]*' \) 2>/dev/null | sed 's/^/ /'
+# find /dev /dev/dri \( -type c -name 'fb[0-9]*' -o -type c -name 'card[0-9]*' \) 2>/dev/null | sed 's/^/ /'
 
 bashio::log.info "DEBUG: about to start DRM detection loop"
-# Enable shell tracing for the DRM detection block to help diagnose early exits
-# Trace to stdout so it appears in container logs
-if command -v bash >/dev/null 2>&1; then
-    BASH_XTRACEFD=1
-    set -x
-    TRACE_ENABLED=1
-fi
 bashio::log.info "DRM video card driver and connection status:"
 selected_card=""
 use_fbdev_fallback=""

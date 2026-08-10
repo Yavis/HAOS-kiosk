@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.4.6 - August 2026
+
+- Remove tracing
+- Skip find
+
 ## v1.4.5 - August 2026
 
 - update
