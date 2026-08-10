@@ -755,7 +755,7 @@ if [ -n "$VNC_SERVER" ]; then
     fi
 
     # shellcheck disable=SC2086
-    x11vnc $X11VNC_OPTS 2> >(grep -v 'The VNC desktop is:' >&2)
+    x11vnc $X11VNC_OPTS 2>&1 | grep -v 'The VNC desktop is:' >&2 &
 fi
 
 #### Start browser (or debug mode)  and wait/sleep
