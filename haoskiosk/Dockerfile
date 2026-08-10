@@ -17,8 +17,11 @@ ENV ADDON_VERSION=${BUILD_VERSION}
 RUN apk update && apk add --no-cache \
 ## Xserver and graphics
      xorg-server \
+     # Alpine equivalent of Debian/Ubuntu xserver-xorg-core
      xf86-video-modesetting \
      xf86-video-fbdev \
+     # Intel graphics use the modesetting driver on Alpine;
+     # xf86-video-intel is not available in Alpine v3.24 main/community.
      mesa-dri-gallium \
      mesa-egl \
      mesa-gles \

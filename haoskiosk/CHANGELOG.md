@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.4.7
+
+- update deps
+
 ## v1.4.6 - August 2026
 
 - Remove tracing

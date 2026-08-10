@@ -315,18 +315,34 @@ if [ -z "$selected_card" ]; then
     else
         bashio::log.info "DEBUG: /sys/class/drm missing"
     fi
+
+    # If no connected DRM card was found by status, but DRM device nodes exist,
+    # prefer modesetting on the first available card rather than falling back
+    # immediately to fbdev.
+    if [ -z "$selected_card" ] && [ -d /dev/dri ]; then
+        if drm_card_node=$(find /dev/dri -maxdepth 1 -type c -name 'card*' 2>/dev/null | sort | head -n 1); then
+            if [ -n "$drm_card_node" ]; then
+                selected_card=$(basename "$drm_card_node")
+                bashio::log.info "DEBUG: Found DRM device node /dev/dri/$selected_card; will try modesetting first"
+            fi
+        fi
+    fi
+
     if [ -c /dev/fb0 ]; then
         bashio::log.info "DEBUG: /dev/fb0 exists"
         ls -l /dev/fb0 | sed 's/^/DEBUG: fb0: /' || true
     else
         bashio::log.info "DEBUG: /dev/fb0 not present"
     fi
-    if [ -c /dev/fb0 ]; then
-        bashio::log.info "No connected DRM video card detected; falling back to framebuffer /dev/fb0"
-        use_fbdev_fallback=1
-    else
-        bashio::log.info "ERROR: No connected video card detected. Exiting.."
-        exit 1
+
+    if [ -z "$selected_card" ]; then
+        if [ -c /dev/fb0 ]; then
+            bashio::log.info "No connected DRM video card detected; falling back to framebuffer /dev/fb0"
+            use_fbdev_fallback=1
+        else
+            bashio::log.info "ERROR: No connected video card detected. Exiting.."
+            exit 1
+        fi
     fi
 fi
 
