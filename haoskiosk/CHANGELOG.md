@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.4.14
+
+- Try to fix xserver
+
 ## v1.4.13
 
 - handle directories for graphics devices

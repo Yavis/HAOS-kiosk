@@ -372,8 +372,11 @@ else
         if [ -r "$fb_dir/bits_per_pixel" ]; then
             fb_bpp=$(cat "$fb_dir/bits_per_pixel")
             case "$fb_bpp" in
-                16|24|32)
-                    depth="$fb_bpp"
+                16)
+                    depth=16
+                    ;;
+                24|32)
+                    depth=24
                     ;;
                 *)
                     depth=24
