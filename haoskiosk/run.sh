@@ -212,7 +212,7 @@ if [ -e "/dev/tty0" ]; then
 fi
 
 #### Ensure /dev/fb0 is accessible by Xorg (if it exists)
-if [ -c /dev/fb0 ]; then
+if ls /dev/dri/card* >/dev/null 2>&1; then
     bashio::log.info "Framebuffer device /dev/fb0 detected; ensuring it is accessible to Xorg..."
     if chmod 666 /dev/fb0; then
         bashio::log.info "Successfully set /dev/fb0 permissions to 0666"
@@ -289,7 +289,7 @@ libinput list-devices 2>/dev/null | awk '
 
 ## Determine main display card
 bashio::log.info "Loaded - DRM video cards:"
-if [ -d /dev/dri/card* ]; then
+if ls /dev/dri/card* >/dev/null 2>&1; then
     ls -l /dev/dri/card* | sed 's/^/  /'
 else
     bashio::log.info " No DRM video cards found in /dev/dri fallback to framebuffer /dev/fb0"
@@ -303,6 +303,7 @@ else
     fi
 fi
 bashio::log.info "DEBUG: about to start DRM detection loop"
+ls -slah /dev/dri
 bashio::log.info "DRM video card driver and connection status:"
 selected_card=""
 use_fbdev_fallback=""
@@ -470,6 +471,16 @@ if ! xset q >/dev/null 2>&1; then
     bashio::log.info "Xorg log:"
     cat /var/log/Xorg.0.log
     bashio::log.info "Xorg log end."
+    bashio::log.info "Please check your configuration and try again."
+    bashio::log.info "Debug info: ls -l /dev/dri:"
+    ls -la /dev/dri
+    bashio::log.info "Debug info: ls -l /dev/fb0:"
+    ls -la /dev/fb0
+    bashio::log.info "Debug info: ls -l /sys/class/drm:"
+    find /sys/class/drm -type f -name status
+    bashio::log.info "Debug info: cat /etc/X11/xorg.conf:"
+    cat /etc/X11/xorg.conf
+    bashio::log.error "Exiting..."
     exit 1
 fi
 bashio::log.info "X server started successfully after $i seconds..."

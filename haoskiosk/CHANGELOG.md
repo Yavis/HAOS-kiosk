@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.4.18
+
+- Enhance debugging
+
 ## v1.4.17
 
 - Add verbose logging on access right setting
