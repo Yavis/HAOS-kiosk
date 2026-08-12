@@ -211,6 +211,16 @@ if [ -e "/dev/tty0" ]; then
     bashio::log.info "Deleted /dev/tty0 successfully..."
 fi
 
+#### Ensure /dev/fb0 is accessible by Xorg (if it exists)
+if [ -c /dev/fb0 ]; then
+    bashio::log.info "Framebuffer device /dev/fb0 detected; ensuring it is accessible to Xorg..."
+    if chmod 666 /dev/fb0; then
+        bashio::log.info "Successfully set /dev/fb0 permissions to 0666"
+    else
+        bashio::log.warning "Failed to chmod /dev/fb0 to 0666 (may be read-only or protected)"
+    fi
+fi
+
 #### Start udev (used by X)
 bashio::log.info "Starting 'udevd' and (re-)triggering..."
 if ! udevd --daemon || ! udevadm trigger; then
@@ -342,9 +352,6 @@ if [ -z "$selected_card" ]; then
     if [ -c /dev/fb0 ]; then
         bashio::log.info "DEBUG: /dev/fb0 exists"
         ls -l /dev/fb0 | sed 's/^/DEBUG: fb0: /' || true
-        # Ensure /dev/fb0 is readable and writable by Xorg
-        chmod 666 /dev/fb0 2>/dev/null || true
-        bashio::log.info "DEBUG: Set /dev/fb0 permissions to 0666"
     else
         bashio::log.info "DEBUG: /dev/fb0 not present"
     fi
@@ -460,7 +467,9 @@ fi
 
 if ! xset q >/dev/null 2>&1; then
     bashio::log.error "Error: X server failed to start within $XSTARTUP seconds."
+    bashio::log.info "Xorg log:"
     cat /var/log/Xorg.0.log
+    bashio::log.info "Xorg log end."
     exit 1
 fi
 bashio::log.info "X server started successfully after $i seconds..."

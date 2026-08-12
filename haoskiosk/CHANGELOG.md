@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.4.17
+
+- Add verbose logging on access right setting
+
 ## v1.4.16
 
 - Apply fix on /dev/fb0
