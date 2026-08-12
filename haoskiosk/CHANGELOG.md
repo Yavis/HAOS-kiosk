@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.4.15
+
+- Add log if X Server fails
+
 ## v1.4.14
 
 - Try to fix xserver

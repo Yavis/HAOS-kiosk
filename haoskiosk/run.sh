@@ -457,6 +457,7 @@ fi
 
 if ! xset q >/dev/null 2>&1; then
     bashio::log.error "Error: X server failed to start within $XSTARTUP seconds."
+    cat /var/log/Xorg.0.log
     exit 1
 fi
 bashio::log.info "X server started successfully after $i seconds..."
