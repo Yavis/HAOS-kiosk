@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.4.16
+
+- Apply fix on /dev/fb0
+
 ## v1.4.15
 
 - Add log if X Server fails

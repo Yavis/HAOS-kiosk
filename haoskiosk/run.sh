@@ -342,6 +342,9 @@ if [ -z "$selected_card" ]; then
     if [ -c /dev/fb0 ]; then
         bashio::log.info "DEBUG: /dev/fb0 exists"
         ls -l /dev/fb0 | sed 's/^/DEBUG: fb0: /' || true
+        # Ensure /dev/fb0 is readable and writable by Xorg
+        chmod 666 /dev/fb0 2>/dev/null || true
+        bashio::log.info "DEBUG: Set /dev/fb0 permissions to 0666"
     else
         bashio::log.info "DEBUG: /dev/fb0 not present"
     fi
